@@ -9,13 +9,13 @@ User = get_user_model()
 
 class TestContent(TestCase):
     NOTE_LIST_URL = reverse('notes:list')
-    number_of_records = 10
+    NUMBER_OF_RECORDS = 10
 
     @classmethod
     def setUpTestData(cls):
         all_notes = []
         cls.author = User.objects.create(username='Создатель Записи')
-        for index in range(cls.number_of_records):
+        for index in range(cls.NUMBER_OF_RECORDS):
             note = Note(
                 title=f'Запись {index}',
                 text='Просто текст.',
@@ -25,9 +25,13 @@ class TestContent(TestCase):
             all_notes.append(note)
         Note.objects.bulk_create(all_notes)
 
+    def setUp(self):
+        self.author_client = Client()
+        self.author_client.force_login(self.author)
+
     def test_notes_order(self):
-        self.client.force_login(self.author)
-        response = self.client.get(self.NOTE_LIST_URL)
+        self.author_client.force_login(self.author)
+        response = self.author_client.get(self.NOTE_LIST_URL)
         object_list = response.context['object_list']
         all_ids = [note.id for note in object_list]
         sorted_ids = sorted(all_ids)
@@ -38,8 +42,6 @@ class TestDetailPage(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Author')
-        cls.author_client = Client()
-        cls.author_client.force_login(cls.author)
         cls.note = Note.objects.create(
             title='Тестовая запись',
             text='Текст.',
@@ -50,6 +52,10 @@ class TestDetailPage(TestCase):
             ('notes:add', None),
             ('notes:edit', (cls.note.slug,))
         )
+
+    def setUp(self):
+        self.author_client = Client()
+        self.author_client.force_login(self.author)
 
     def test_only_user_has_his_notes(self):
         self.another_user = User.objects.create(username='Another User')

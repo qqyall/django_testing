@@ -1,12 +1,12 @@
 from http import HTTPStatus
 
-# from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from notes.models import Note
 
 User = get_user_model()
+NOTES_CREATED = 1
 
 
 class TestNoteCreation(TestCase):
@@ -30,14 +30,16 @@ class TestNoteCreation(TestCase):
         cls.success_url = reverse('notes:success')
 
     def test_anonymous_user_cant_create_note(self):
+        expectation_notes_count = Note.objects.count()
         self.client.post(self.url, data=self.form_data)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 0)
+        self.assertEqual(notes_count, expectation_notes_count)
 
     def test_user_can_create_note(self):
+        expectation_notes_count = Note.objects.count()
         response = self.auth_client.post(self.url, data=self.form_data)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
+        self.assertEqual(notes_count, expectation_notes_count + NOTES_CREATED)
         self.assertRedirects(response, self.success_url)
 
         note = Note.objects.get()
@@ -57,8 +59,6 @@ class TestNoteCreation(TestCase):
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)
 
-        # with self.assertRaises(ValidationError):  # NO RAISES ?WHY?
-        #   self.auth_client.post(self.url, data=new_form_data)
         self.auth_client.post(self.url, data=new_form_data)
 
         notes_count = Note.objects.count()

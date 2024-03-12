@@ -7,6 +7,9 @@ from news.models import Comment, News
 from yanews import settings
 
 
+NUMS_OF_COMMENTS = 10
+
+
 @pytest.fixture
 def author(django_user_model):
     return django_user_model.objects.create(username='Автор')
@@ -67,7 +70,7 @@ def news_list():
 @pytest.fixture
 def comments_list(news, author):
     now = timezone.now()
-    for index in range(10):
+    for index in range(NUMS_OF_COMMENTS):
         comment = Comment.objects.create(
             news=news,
             author=author,
