@@ -44,6 +44,6 @@ def test_anonymous_client_has_no_form(client, news):
 def test_authorized_client_has_form(author_client, news):
     url = reverse('news:detail', args=(news.id,))
     response = author_client.get(url)
-    assert 'form' in response.context, ('Не передана форма в контекст')
+    assert 'form' in response.context, 'Не передана форма в контекст'
     assert isinstance(response.context['form'], CommentForm), (
         f'Полученная форма не соответствует типу {CommentForm}')
